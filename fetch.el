@@ -4,7 +4,7 @@
 ;; Version: 0.0.1
 ;; URL: https://github.com/crshd/fetch.el
 
-;; Copyright (C) 2013, Christian Brassat
+;; COPYRIGHT (C) 2013, Christian Brassat
 ;; All rights reserved.
 ;;
 ;; Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,12 @@
 ;; This package allows you to quickly download and unpack external resources and
 ;; libraries to include in your project.
 ;;
-;; To add entries to the lookup tables, append the fetch-package-alist and
-;; fetch-file-alist like so:
+;; To add entries to the lookup tables, append the fetch-package-alist like so:
 ;;
 ;; (add-to-list 'fetch-package-alist
 ;;              '("name" . "url") t)
 ;;
-;; (add-to-list 'fetch-file-alist
-;;              '("name" . "url") t)
-;;
-;; After the lists are populated, you can fetch the resources using
+;; After the list is populated, you can fetch the resources using
 ;; M-x fetch-resource
 ;;
 ;; The temporary download directory can be adjusted by setting the
@@ -59,12 +55,10 @@
 (defvar fetch-download-location "/tmp/emacs-fetch/"
   "Temporary location where the resource files are saved")
 
-(defvar fetch-package-alist
-  '(("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
-
-(defvar fetch-file-alist
+(setq fetch-package-alist
   '(("jquery"    . "http://code.jquery.com/jquery.min.js")
-    ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")))
+    ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
+    ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
 (defun download-resource (url)
   "Download the resource package from url"
@@ -95,16 +89,16 @@
 
 (defun fetch-resource (name)
   "Download and extract the resource file"
-  (interactive "sResource to fetch: ")
-  (cond
-   ((setq url (cdr (assoc name fetch-package-alist)))
-    (setq filename (car (last (split-string url "/" t))))
-    (download-resource url)
-    (extract-resource filename))
-   ((setq url (cdr (assoc name fetch-file-alist)))
-    (setq filename (car (last (split-string url "/" t))))
-    (download-resource url)
-    (move-resource filename))))
+  (interactive
+   (list
+    (minibuffer-with-setup-hook 'minibuffer-completion-help
+      (completing-read "Resource to fetch: " fetch-package-alist))))
+   (setq url (cdr (assoc name fetch-package-alist)))
+   (setq filename (car (last (split-string url "/" t))))
+   (download-resource url)
+   (if (string= (car (last (split-string filename "\\." t))) "zip")
+       (extract-resource filename)
+     (move-resource filename)))
 
 (provide 'fetch)
 
