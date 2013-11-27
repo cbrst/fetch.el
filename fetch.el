@@ -67,8 +67,7 @@
   "Download the resource package from url"
   (make-directory fetch-download-location t)
   (let ((download-buffer (url-retrieve-synchronously url)))
-    (save-excursion
-      (set-buffer download-buffer)
+    (with-current-buffer download-buffer
       (goto-char (point-min))
       (re-search-forward "^$" nil 'move)
       (forward-char)
