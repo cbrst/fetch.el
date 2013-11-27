@@ -55,6 +55,9 @@
 (defvar fetch-download-location "/tmp/emacs-fetch/"
   "Temporary location where the resource files are saved")
 
+(defvar fetch-auto-close-buffer t
+  "Automatically close shell output buffers")
+
 (setq fetch-package-alist
   '(("jquery"    . "http://code.jquery.com/jquery.min.js")
     ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
@@ -77,8 +80,10 @@
   "Extract the resource file"
   (setq file (concat fetch-download-location resource-file))
   (shell-command (if location
-                     (concat "unzip " file " -d " location)
-                   (concat "unzip " file))))
+                     (concat "unzip -o " file " -d " location)
+                   (concat "unzip -o " file)))
+  (if fetch-auto-close-buffer
+      (kill-buffer resource-file)))
 
 (defun move-resource (resource-file &optional location)
   "Copy a file to the proper location"
@@ -98,7 +103,10 @@
    (download-resource url)
    (if (string= (car (last (split-string filename "\\." t))) "zip")
        (extract-resource filename)
-     (move-resource filename)))
+     (move-resource filename))
+   (if fetch-auto-close-buffer
+       (kill-buffer "*Shell Command Output*")))
+   
 
 (provide 'fetch)
 
