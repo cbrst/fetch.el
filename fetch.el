@@ -27,7 +27,7 @@
 ;; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 ;; CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-;; POSSIBILITY OF SUCH DAMAGE. 
+;; POSSIBILITY OF SUCH DAMAGE.
 
 ;; This file is NOT part of Emacs
 
@@ -52,11 +52,13 @@
 
 (require 'url)
 
+;;; Code:
+
 (defvar fetch-download-location "/tmp/emacs-fetch/"
-  "Temporary location where the resource files are saved")
+  "Temporary location where the resource files are saved.")
 
 (defvar fetch-auto-close-buffer t
-  "Automatically close shell output buffers")
+  "Automatically close shell output buffers.")
 
 (setq fetch-package-alist
   '(("jquery"    . "http://code.jquery.com/jquery.min.js")
@@ -64,7 +66,7 @@
     ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
 (defun download-resource (url)
-  "Download the resource package from url"
+  "Download the resource package from URL."
   (make-directory fetch-download-location t)
   (let ((download-buffer (url-retrieve-synchronously url)))
     (with-current-buffer download-buffer
@@ -76,7 +78,7 @@
                           (car (last (split-string url "/" t))))))))
 
 (defun extract-resource (resource-file &optional location)
-  "Extract the resource file"
+  "Extract RESOURCE-FILE."
   (setq file (concat fetch-download-location resource-file))
   (shell-command (if location
                      (concat "unzip -o " file " -d " location)
@@ -85,14 +87,14 @@
       (kill-buffer resource-file)))
 
 (defun move-resource (resource-file &optional location)
-  "Copy a file to the proper location"
+  "Copy RESOURCE-FILE to the current directory or LOCATION if not nil."
   (copy-file (concat fetch-download-location
                      resource-file)
              (or location
                  default-directory)))
 
 (defun fetch-resource (name)
-  "Download and extract the resource file"
+  "Download and extract the resource file."
   (interactive
    (list
     (minibuffer-with-setup-hook 'minibuffer-completion-help
