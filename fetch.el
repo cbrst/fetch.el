@@ -66,16 +66,9 @@
     ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
 (defun fetch-download-resource (url)
-  "Download the resource package from URL."
+  "Download the file at URL"
   (make-directory fetch-download-location t)
-  (let ((download-buffer (url-retrieve-synchronously url)))
-    (with-current-buffer download-buffer
-      (goto-char (point-min))
-      (re-search-forward "^$" nil 'move)
-      (forward-char)
-      (delete-region (point-min) (point))
-      (write-file (concat fetch-download-location
-                          (car (last (split-string url "/" t))))))))
+  (url-copy-file url (concat fetch-download-location "/" (car (last (split-string url "/" t))))))
 
 (defun fetch-extract-resource (resource-file &optional location)
   "Extract RESOURCE-FILE."
@@ -103,7 +96,7 @@
       (completing-read "Resource to fetch: " fetch-package-alist))))
    (setq url (cdr (assoc name fetch-package-alist)))
    (setq filename (car (last (split-string url "/" t))))
-   (fetch-download-resource url)
+   (fetch-get-file url)
    (if (string= (car (last (split-string filename "\\." t))) "zip")
        (fetch-extract-resource filename)
      (fetch-move-resource filename))
