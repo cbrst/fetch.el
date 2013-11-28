@@ -65,15 +65,12 @@
         ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
         ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
-(defun fetch-download-resource (url)
-  "Download the file at URL"
-  (make-directory fetch-download-location t)
-  (url-copy-file url (concat fetch-download-location "/" (car (last (split-string url "/" t)))) t))
-
 (defun fetch-handle-file (file-name &optional location)
   "Handle the file FILE-NAME - extract or copy to current directory or LOCATION if set and not nil"
-  (setq file (concat fetch-download-location file-name))
-  (setq extension (car (last (split-string file-name "\\." t))))
+  (let (file extension)
+     (setq file (concat fetch-download-location file-name))
+     (setq extension (car (last (split-string file-name "\\." t))))
+     t)
   (cond
    ((string= extension "zip")
     (shell-command (if location
@@ -93,7 +90,7 @@
 ;;;###autoload
 
 (defun fetch-resource (name)
-  "Download and extract the resource file."
+  "Download and extract the resource file corresponding to the NAME entry in fetch-package-alist."
   (interactive
    (list
     (minibuffer-with-setup-hook 'minibuffer-completion-help
@@ -101,8 +98,10 @@
   (fetch-url (cdr (assoc name fetch-package-alist))))
 
 (defun fetch-url (url)
+  "Download and extract the resource from URL."
   (interactive "sFetch resource from URL: ")
-  (fetch-download-resource url)
+  (make-directory fetch-download-location t)
+  (url-copy-file url (concat fetch-download-location "/" (car (last (split-string url "/" t)))) t)
   (fetch-handle-file (car (last (split-string url "/" t))))
   (if fetch-auto-close-buffer
       (kill-buffer "*Shell Command Output*")))
