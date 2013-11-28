@@ -60,7 +60,7 @@
 (defvar fetch-auto-close-buffer t
   "Automatically close shell output buffers.")
 
-(setq fetch-package-alist
+(defvar fetch-package-alist
       '(("jquery"    . "http://code.jquery.com/jquery.min.js")
         ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
         ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
@@ -68,23 +68,27 @@
 (defun fetch-download-resource (url)
   "Download the file at URL"
   (make-directory fetch-download-location t)
-  (url-copy-file url (concat fetch-download-location "/" (car (last (split-string url "/" t))))))
+  (url-copy-file url (concat fetch-download-location "/" (car (last (split-string url "/" t)))) t))
 
-(defun fetch-extract-resource (resource-file &optional location)
-  "Extract RESOURCE-FILE."
-  (setq file (concat fetch-download-location resource-file))
-  (shell-command (if location
-                     (concat "unzip -o " file " -d " location)
-                   (concat "unzip -o " file)))
+(defun fetch-handle-file (file-name &optional location)
+  "Handle the file FILE-NAME - extract or copy to current directory or LOCATION if set and not nil"
+  (setq file (concat fetch-download-location file-name))
+  (setq extension (car (last (split-string file-name "\\." t))))
+  (cond
+   ((string= extension "zip")
+    (shell-command (if location
+                       (concat "unzip -o " file " -d " location)
+                     (concat "unzip -o " file))))
+   ((member extension '("bz2" "gz" "tar" "xz"))
+    (shell-command (if location
+                       (concat "tar xf " file " -C " location)
+                     (concat "tar xf " file))))
+   (t
+    (copy-file file (or location
+                        default-directory))))
   (if fetch-auto-close-buffer
-      (kill-buffer resource-file)))
-
-(defun fetch-move-resource (resource-file &optional location)
-  "Copy RESOURCE-FILE to the current directory or LOCATION if not nil."
-  (copy-file (concat fetch-download-location
-                     resource-file)
-             (or location
-                 default-directory)))
+      (when (get-buffer file-name)
+        (kill-buffer file-name))))
 
 ;;;###autoload
 
@@ -98,11 +102,8 @@
 
 (defun fetch-url (url)
   (interactive "sFetch resource from URL: ")
-  (fetch-get-file url)
-  (setq filename (car (last (split-string url "/" t))))
-  (if (string= (car (last (split-string filename "\\." t))) "zip")
-      (fetch-extract-resource filename)
-    (fetch-move-resource filename))
+  (fetch-download-resource url)
+  (fetch-handle-file (car (last (split-string url "/" t))))
   (if fetch-auto-close-buffer
       (kill-buffer "*Shell Command Output*")))
 
