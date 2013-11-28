@@ -65,7 +65,7 @@
     ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
     ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
-(defun download-resource (url)
+(defun fetch-download-resource (url)
   "Download the resource package from URL."
   (make-directory fetch-download-location t)
   (let ((download-buffer (url-retrieve-synchronously url)))
@@ -77,7 +77,7 @@
       (write-file (concat fetch-download-location
                           (car (last (split-string url "/" t))))))))
 
-(defun extract-resource (resource-file &optional location)
+(defun fetch-extract-resource (resource-file &optional location)
   "Extract RESOURCE-FILE."
   (setq file (concat fetch-download-location resource-file))
   (shell-command (if location
@@ -86,7 +86,7 @@
   (if fetch-auto-close-buffer
       (kill-buffer resource-file)))
 
-(defun move-resource (resource-file &optional location)
+(defun fetch-move-resource (resource-file &optional location)
   "Copy RESOURCE-FILE to the current directory or LOCATION if not nil."
   (copy-file (concat fetch-download-location
                      resource-file)
@@ -101,10 +101,10 @@
       (completing-read "Resource to fetch: " fetch-package-alist))))
    (setq url (cdr (assoc name fetch-package-alist)))
    (setq filename (car (last (split-string url "/" t))))
-   (download-resource url)
+   (fetch-download-resource url)
    (if (string= (car (last (split-string filename "\\." t))) "zip")
-       (extract-resource filename)
-     (move-resource filename))
+       (fetch-extract-resource filename)
+     (fetch-move-resource filename))
    (if fetch-auto-close-buffer
        (kill-buffer "*Shell Command Output*")))
    
