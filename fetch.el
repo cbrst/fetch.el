@@ -93,6 +93,8 @@
              (or location
                  default-directory)))
 
+;;;###autoload
+
 (defun fetch-resource (name)
   "Download and extract the resource file."
   (interactive
