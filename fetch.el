@@ -61,9 +61,9 @@
   "Automatically close shell output buffers.")
 
 (setq fetch-package-alist
-  '(("jquery"    . "http://code.jquery.com/jquery.min.js")
-    ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
-    ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
+      '(("jquery"    . "http://code.jquery.com/jquery.min.js")
+        ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
+        ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
 (defun fetch-download-resource (url)
   "Download the file at URL"
@@ -94,15 +94,17 @@
    (list
     (minibuffer-with-setup-hook 'minibuffer-completion-help
       (completing-read "Resource to fetch: " fetch-package-alist))))
-   (setq url (cdr (assoc name fetch-package-alist)))
-   (setq filename (car (last (split-string url "/" t))))
-   (fetch-get-file url)
-   (if (string= (car (last (split-string filename "\\." t))) "zip")
-       (fetch-extract-resource filename)
-     (fetch-move-resource filename))
-   (if fetch-auto-close-buffer
-       (kill-buffer "*Shell Command Output*")))
-   
+  (fetch-url (cdr (assoc name fetch-package-alist))))
+
+(defun fetch-url (url)
+  (interactive "sFetch resource from URL: ")
+  (fetch-get-file url)
+  (setq filename (car (last (split-string url "/" t))))
+  (if (string= (car (last (split-string filename "\\." t))) "zip")
+      (fetch-extract-resource filename)
+    (fetch-move-resource filename))
+  (if fetch-auto-close-buffer
+      (kill-buffer "*Shell Command Output*")))
 
 (provide 'fetch)
 
