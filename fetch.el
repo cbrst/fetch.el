@@ -1,7 +1,7 @@
 ;;; fetch.el --- Fetch and unpack resources
 
 ;; Author: Christian 'crshd' Brassat <christian.brassat@gmail.com>
-;; Version: 0.0.1
+;; Version: 0.1.1
 ;; URL: https://github.com/crshd/fetch.el
 
 ;; COPYRIGHT (C) 2013, Christian Brassat
