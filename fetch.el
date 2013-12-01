@@ -1,7 +1,7 @@
 ;;; fetch.el --- Fetch and unpack resources
 
 ;; Author: Christian 'crshd' Brassat <christian.brassat@gmail.com>
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; URL: https://github.com/crshd/fetch.el
 
 ;; COPYRIGHT (C) 2013, Christian Brassat
@@ -61,31 +61,28 @@
   "Automatically close shell output buffers.")
 
 (defvar fetch-package-alist
-      '(("jquery"    . "http://code.jquery.com/jquery.min.js")
-        ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
-        ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
+  '(("jquery"    . "http://code.jquery.com/jquery.min.js")
+    ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
+    ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
 
-(defun fetch-handle-file (file-name &optional location)
-  "Handle the file FILE-NAME - extract or copy to current directory or LOCATION if set and not nil"
-  (let (file extension)
-     (setq file (concat fetch-download-location file-name))
-     (setq extension (car (last (split-string file-name "\\." t))))
-     t)
-  (cond
-   ((string= extension "zip")
-    (shell-command (if location
-                       (concat "unzip -o " file " -d " location)
-                     (concat "unzip -o " file))))
-   ((member extension '("bz2" "gz" "tar" "xz"))
-    (shell-command (if location
-                       (concat "tar xf " file " -C " location)
-                     (concat "tar xf " file))))
-   (t
-    (copy-file file (or location
-                        default-directory))))
-  (if fetch-auto-close-buffer
-      (when (get-buffer file-name)
-        (kill-buffer file-name))))
+(defun fetch-handle-file (file &optional location)
+  "Handle the FILE - extract or copy to current directory or LOCATION if set and not nil"
+  (let ((extension (car (last (split-string file "\\." t)))))
+    (cond
+     ((string= extension "zip")
+      (shell-command (if location
+                         (concat "unzip -o " file " -d " location)
+                       (concat "unzip -o " file))))
+     ((member extension '("bz2" "gz" "tar" "xz"))
+      (shell-command (if location
+                         (concat "tar xf " file " -C " location)
+                       (concat "tar xf " file))))
+     (t
+      (copy-file file (or location
+                          default-directory))))
+    (if fetch-auto-close-buffer
+        (when (get-buffer file-name)
+          (kill-buffer file-name)))))
 
 ;;;###autoload
 
@@ -100,11 +97,12 @@
 (defun fetch-url (url)
   "Download and extract the resource from URL."
   (interactive "sFetch resource from URL: ")
-  (make-directory fetch-download-location t)
-  (url-copy-file url (concat fetch-download-location "/" (car (last (split-string url "/" t)))) t)
-  (fetch-handle-file (car (last (split-string url "/" t))))
-  (if fetch-auto-close-buffer
-      (kill-buffer "*Shell Command Output*")))
+  (let ((file (concat fetch-download-location "/" (car (last (split-string url "/" t))))))
+    (make-directory fetch-download-location t)
+    (url-copy-file url file t)
+    (fetch-handle-file file)
+    (if fetch-auto-close-buffer
+        (kill-buffer "*Shell Command Output*"))))
 
 (provide 'fetch)
 
