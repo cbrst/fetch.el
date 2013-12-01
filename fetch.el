@@ -63,7 +63,7 @@
 (defvar fetch-package-alist
   '(("jquery"    . "http://code.jquery.com/jquery.min.js")
     ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
-    ("bootstrap" . "https://github.com/twbs/bootstrap/releases/download/v3.0.1/bootstrap-3.0.1-dist.zip")))
+    ("bootstrap" . "https://github.com/twbs/bootstrap/archive/master.zip")))
 
 (defun fetch-handle-file (file &optional location)
   "Handle the FILE - extract or copy to current directory or LOCATION if set and not nil"
