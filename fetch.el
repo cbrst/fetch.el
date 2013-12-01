@@ -81,8 +81,8 @@
       (copy-file file (or location
                           default-directory))))
     (if fetch-auto-close-buffer
-        (when (get-buffer file-name)
-          (kill-buffer file-name)))))
+        (when (get-buffer file)
+          (kill-buffer file)))))
 
 ;;;###autoload
 
