@@ -1,7 +1,7 @@
 ;;; fetch.el --- Fetch and unpack resources
 
 ;; Author: Christian 'crshd' Brassat <christian.brassat@gmail.com>
-;; Version: 0.1.2
+;; Version: 0.2.3
 ;; URL: https://github.com/crshd/fetch.el
 
 ;; COPYRIGHT (C) 2013, Christian Brassat
@@ -85,7 +85,6 @@
           (kill-buffer file)))))
 
 ;;;###autoload
-
 (defun fetch-resource (name)
   "Download and extract the resource file corresponding to the NAME entry in fetch-package-alist."
   (interactive
@@ -94,6 +93,7 @@
       (completing-read "Resource to fetch: " fetch-package-alist))))
   (fetch-url (cdr (assoc name fetch-package-alist))))
 
+;;;###autoload
 (defun fetch-url (url)
   "Download and extract the resource from URL."
   (interactive "sFetch resource from URL: ")
@@ -103,6 +103,20 @@
     (fetch-handle-file file)
     (if fetch-auto-close-buffer
         (kill-buffer "*Shell Command Output*"))))
+
+;;;###autoload
+(defun fetch-make-menu ()
+  "Make a menu from the contents of fetch-package-alist, and add it as a
+   submenu under Tools"
+  (interactive)
+  (define-key-after global-map [menu-bar tools separator-8] '("--") 'vc)
+  (define-key-after global-map [menu-bar tools fetchmenu]
+    (cons "Fetch" (make-sparse-keymap "fetch stuff")) 'separator-8)
+  (dolist (item fetch-package-alist)
+    (let ((x (car item)))
+      (define-key global-map
+        (vector 'menu-bar 'tools 'fetchmenu x)
+        (cons x `(lambda () (interactive) (fetch-resource ,x)))))))
 
 (provide 'fetch)
 
