@@ -60,10 +60,10 @@
 (defvar fetch-auto-close-buffer t
   "Automatically close shell output buffers.")
 
-(defvar fetch-package-alist
-  '(("jquery"    . "http://code.jquery.com/jquery.min.js")
-    ("normalize" . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
-    ("bootstrap" . "https://github.com/twbs/bootstrap/archive/master.zip")))
+(setq fetch-package-alist
+  '((jquery    . "http://code.jquery.com/jquery.min.js")
+    (normalize . "https://raw.github.com/necolas/normalize.css/master/normalize.css")
+    (bootstrap . "https://github.com/twbs/bootstrap/archive/master.zip")))
 
 (defun fetch-handle-file (file &optional location)
   "Handle the FILE - extract or copy to current directory or LOCATION if set and not nil"
@@ -91,7 +91,7 @@
    (list
     (minibuffer-with-setup-hook 'minibuffer-completion-help
       (completing-read "Resource to fetch: " fetch-package-alist))))
-  (fetch-url (cdr (assoc name fetch-package-alist))))
+  (fetch-url (cdr (assoc (intern name) fetch-package-alist))))
 
 ;;;###autoload
 (defun fetch-url (url)
@@ -116,7 +116,7 @@
     (let ((x (car item)))
       (define-key global-map
         (vector 'menu-bar 'tools 'fetchmenu x)
-        (cons x `(lambda () (interactive) (fetch-resource ,x)))))))
+        (cons (symbol-name x) `(lambda () (interactive) (fetch-resource ,(symbol-name x))))))))
 
 (provide 'fetch)
 
